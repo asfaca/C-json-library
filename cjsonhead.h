@@ -47,5 +47,17 @@ struct json_node {
     struct json_node        *next, *prev;
 };
 
+//return type int is for notification of operation success or fail(error).
+
 //get value of json by passing js command string... (parse js command internally)
-void* get_value(struct json_obj_head, char js_command[]);
+void* cjson_get(struct json_obj_head *json, char *js_command);
+//change value of target. value is passed by void pointer
+int cjson_change(struct json_obj_head *json, char *target, void *value);
+//open json file, parse and convert json to C data structure.
+struct json_obj_head* cjson_open(char *path);
+//convert C sturct to json file.
+int cjson_cvrt_to_json(struct json_obj_head *json, char *filename);
+//push operation
+int cjson_push(struct json_obj_head *json, void *value);
+//pop operation. this operation just remove value. it does not return value.
+int cjson_pop(struct json_obj_head *json);
