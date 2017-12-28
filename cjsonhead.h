@@ -10,6 +10,10 @@ struct json_arr_head {
     struct json_arr_node *tail;
 };
 
+struct json_arr_node {
+
+};
+
 struct json_node {
     unsigned char           val_type;       //srting, number, object, boolean, null
     unsigned char           *key;
