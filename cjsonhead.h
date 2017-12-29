@@ -48,6 +48,12 @@ struct json_node {
 
 //return type int is for notification of operation success or fail(error).
 
+//minor functions
+//check validity of json file.
+int valid(char *json, int size);
+struct json_obj_head* __parse(char *json, int size);
+
+
 //get value of json by passing key.
 void* cjson_get(struct json_obj_head *json, char *key);
 //change value of target. value is passed by void pointer
