@@ -50,8 +50,10 @@ struct json_node {
 
 //minor functions
 //check validity of json file.
-int valid(char *json, int size);
+int cJson_invalid(char *json, int size);
 struct json_obj_head* __parse(char *json, int size);
+//parsing functions
+void cjson_make_obj(char *json, struct json_obj_head, int *index, int size);
 
 
 //get value of json by passing key.

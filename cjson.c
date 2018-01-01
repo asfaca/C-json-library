@@ -22,20 +22,35 @@ int valid(char *json, int size) {
     }
 }
 
-//use stack?
-struct json_obj_head* __parse(char *json, int size) {
-    struct json_obj_head *cjson = NULL;
-    int i, key_start, key_end;
-    cjson = (struct json_obj_head *)malloc(sizeof(struct json_obj_head));
+/* call chain - object maker */
+void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int size) {
+    cjson = (struct json_obj_head*)malloc(sizeof(struct json_obj_head));
     if (cjson == NULL) {
-        printf("ERR : malloc json_obj_head error\n");
-        return NULL;
+        printf("ERR : json_obj_head malloc error\n");
+        return;
     }
+    
+    while (*index < size) {    
+        //make token for key.
 
-    for(i = 1; i < size; i++) {
-        if (json[i] == "\"")
+        //make token for value.
+
+        //decide the type of value and take branchs.
+
+        //check end brace for exit while loop.
     }
+}
 
+/* 
+    use stack and call chain...
+    ex) whenever encountering brace {, call function which makes obj struct
+        whenever encountering double quotation ", call function which makes key node struct...
+*/
+struct json_obj_head* __parse(char *json, int size) {
+
+    int i = 1;
+    struct json_obj_head *cjson = NULL;
+    cjson_make_obj(json, cjson ,&i, size);
     return cjson;
 }
 
@@ -73,7 +88,7 @@ struct json_obj_head* cjson_parse(char *path) {
         set stack to hold brace and check validity of json file 
         check {, }, ", ", [, ]
     */
-    if (invalid(json, fs.st_size)) {
+    if (cJson_invalid(json, fs.st_size)) {
         printf("ERR : invalid json file\n");
         return NULL;
     }
