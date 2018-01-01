@@ -1,7 +1,7 @@
 CC=gcc
 CFLAGS=-g
 TARGET=exe
-OBJS=cjson.o
+OBJS=cjson_parse.o
 
 all: $(TARGET)
 
@@ -11,4 +11,4 @@ clean:
 $(TARGET): $(OBJS)
 	$(CC) -o $@ $(OBJS)
 
-cjson.o: cjsonhead.h cjsontype.h cjson.c
+cjson_parse.o: cjsonhead.h cjsontype.h cjson_parse.c
