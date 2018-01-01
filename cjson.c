@@ -6,6 +6,7 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <string.h>
 
 int main(void) {
     struct json_obj_head *json = cjson_parse("sample.json");
@@ -22,11 +23,68 @@ int cjson_invalid(char *json, int size) {
     }
 }
 
-void cjson_make_json_node(char *json, struct json_node *key, int *index, int size) {
+void cjson_make_json_node(char *json, struct json_obj_head *cjson, int *index) {
+    int k_start = ++*index, k_end;
+    char *keyname = NULL;
+    struct json_node *keynode = NULL;
 
+    keynode = (struct json_node *)malloc(sizeof(struct json_node));
+    if (keynode = NULL) {
+        printf("ERR : json_node malloc error.\n");
+        return;
+    }
+    memset(keynode, 0, sizeof(struct json_node));
+    
+    //set key fields
+    while(1) {
+        if (*index == '\"') {
+            k_end = *index;
+            *index++;
+            break;
+        }
+        *index++;
+    }
+    keyname = (char*)malloc(sizeof(k_end - k_start + 1));
+    memcpy((char*)keyname, (char*)&json[k_start], k_end - k_start);
+    keyname[k_end - k_start] = '\0';
+    
+    //set json_node fields
+    keynode->key = keyname;
+
+    //set link between obj head and node. 
+    if (cjson->head == NULL) {
+        cjson->head = keynode;
+        cjson->tail = keynode;
+        cjson->len++;
+    }
+    else {
+        cjson->tail->next = keynode;
+        keynode->prev = cjson->tail;
+        cjson->tail = keynode;
+    }
 }
 
 void cjson_check_val_type(char *json, int *index, char *type) {
+
+}
+
+void cjson_make_numval(char *json, struct json_node *key, int *index) {
+
+}
+
+void cjson_make_strval(char *json, struct json_node *key, int *index) {
+
+}
+
+void cjson_make_arrval(char *json, struct json_node *key, int *index) {
+
+}
+
+void cjson_make_nulval(char *json, struct json_node *key, int *index) {
+
+}
+
+void cjson_make_boolval(char *json, struct json_node *key, int *index) {
 
 }
 
@@ -39,34 +97,35 @@ void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int siz
         return;
     }
     /* init json_obj_head */
+    cjson->len = 0;
     cjson->head = NULL;
     cjson->tail = NULL;
 
     while (*index < size) {    
         //make key node.
         if (json[*index] == '\"')
-            cjson_make_json_node(json, cjson->head, index, size);
+            cjson_make_json_node(json, cjson, index);
         //check : token. if token is :, decide which type of value.
         else if (json[*index] == ':') {
             cjson_check_val_type(json, index, &type);
             //make value node for valid type.
             if (type == NUM) {
-                
+                cjson_make_numval(json, cjson->tail, index);
             }
             else if (type == STR) {
-
+                cjson_make_strval(json, cjson->tail, index);
             }
             else if (type == OBJ) {
-
+                cjson_make_obj(json, cjson->tail->val_obj, index, size);
             }
             else if (type == ARR) {
-
+                cjson_make_arrval(json, cjson->tail, index);
             }
             else if (type == NUL) {
-
+                cjson_make_nulval(json, cjson->tail, index);
             }
             else if (type == BOOL) {
-
+                cjson_make_boolval(json, cjson->tail, index);
             }
         }
         //check , for continue
