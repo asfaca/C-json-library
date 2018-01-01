@@ -29,15 +29,31 @@ void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int siz
         printf("ERR : json_obj_head malloc error\n");
         return;
     }
+    /* init json_obj_head */
+    memset(cjson, 0, sizeof(struct json_obj_head));
     
     while (*index < size) {    
-        //make token for key.
+        //make key node.
+        if (json[*index] == '\"')
+            cjson_make_json_node(json, cjson->next, index, size);
+        //check : token. if token is :, decide which type of value.
+        else if () {
 
-        //make token for value.
+        }
+        //make value node for valid type.
 
-        //decide the type of value and take branchs.
-
+        //check , for continue
+        else if (json[*index] == ',') {
+            *index++;
+            continue;
+        }
         //check end brace for exit while loop.
+        else if (json[*index] == '}') {
+            *index++;
+            return;
+        }
+        //increase i
+        *index++;
     }
 }
 
