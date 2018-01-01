@@ -24,6 +24,7 @@ int valid(char *json, int size) {
 
 /* call chain - object maker */
 void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int size) {
+    char type;
     cjson = (struct json_obj_head*)malloc(sizeof(struct json_obj_head));
     if (cjson == NULL) {
         printf("ERR : json_obj_head malloc error\n");
@@ -37,11 +38,28 @@ void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int siz
         if (json[*index] == '\"')
             cjson_make_json_node(json, cjson->next, index, size);
         //check : token. if token is :, decide which type of value.
-        else if () {
+        else if (json[*index] == ':') {
+            cjson_check_val_type(json, index, &type);
+            //make value node for valid type.
+            if (type == NUM) {
+                
+            }
+            else if (type == STR) {
 
+            }
+            else if (type == OBJ) {
+
+            }
+            else if (type == ARR) {
+
+            }
+            else if (type == NUL) {
+
+            }
+            else if (type == BOOL) {
+
+            }
         }
-        //make value node for valid type.
-
         //check , for continue
         else if (json[*index] == ',') {
             *index++;
