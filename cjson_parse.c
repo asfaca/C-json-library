@@ -28,6 +28,7 @@ void cjson_make_json_node(char *json, struct json_obj_head *cjson, int *index) {
     char *keyname = NULL;
     struct json_node *keynode = NULL;
 
+    //mem allocate for json_node.
     keynode = (struct json_node *)malloc(sizeof(struct json_node));
     if (keynode = NULL) {
         printf("ERR : json_node malloc error.\n");
@@ -39,7 +40,6 @@ void cjson_make_json_node(char *json, struct json_obj_head *cjson, int *index) {
     while(1) {
         if (*index == '\"') {
             k_end = *index;
-            *index++;
             break;
         }
         *index++;
@@ -47,8 +47,6 @@ void cjson_make_json_node(char *json, struct json_obj_head *cjson, int *index) {
     keyname = (char*)malloc(sizeof(k_end - k_start + 1));
     memcpy((char*)keyname, (char*)&json[k_start], k_end - k_start);
     keyname[k_end - k_start] = '\0';
-    
-    //set json_node fields
     keynode->key = keyname;
 
     //set link between obj head and node. 
