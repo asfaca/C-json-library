@@ -14,12 +14,20 @@ int main(void) {
 }
 
 //check validity of json file.
-int valid(char *json, int size) {
+int cjson_invalid(char *json, int size) {
     int fp;
     int stack[size/2];
     for(fp = 0; fp < size; fp++) {
         //implement...
     }
+}
+
+void cjson_make_json_node(char *json, struct json_node *key, int *index, int size) {
+
+}
+
+void cjson_check_val_type(char *json, int *index, char *type) {
+
 }
 
 /* call chain - object maker */
@@ -31,12 +39,13 @@ void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int siz
         return;
     }
     /* init json_obj_head */
-    memset(cjson, 0, sizeof(struct json_obj_head));
-    
+    cjson->head = NULL;
+    cjson->tail = NULL;
+
     while (*index < size) {    
         //make key node.
         if (json[*index] == '\"')
-            cjson_make_json_node(json, cjson->next, index, size);
+            cjson_make_json_node(json, cjson->head, index, size);
         //check : token. if token is :, decide which type of value.
         else if (json[*index] == ':') {
             cjson_check_val_type(json, index, &type);
@@ -122,7 +131,7 @@ struct json_obj_head* cjson_parse(char *path) {
         set stack to hold brace and check validity of json file 
         check {, }, ", ", [, ]
     */
-    if (cJson_invalid(json, fs.st_size)) {
+    if (cjson_invalid(json, fs.st_size)) {
         printf("ERR : invalid json file\n");
         return NULL;
     }
