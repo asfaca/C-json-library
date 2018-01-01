@@ -3,7 +3,7 @@
 #define STR     0x02
 #define ARR     0x03
 #define OBJ     0x04
-#define NULL    0x05
+#define NUL     0x05
 #define BOOL    0x06
 
 //error type

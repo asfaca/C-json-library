@@ -1,5 +1,6 @@
 struct json_obj_head {
     //linked list of json_node structure
+    int len;
     struct json_node *head;
     struct json_node *tail;
 };
@@ -33,7 +34,7 @@ struct json_str_head {
 };
 
 struct json_node {
-    unsigned char           *key;
+    char                    *key;
     unsigned char           val_type;       //srting, number, object, boolean, null
     int                     *val_num_int;
     float                   *val_num_float;
@@ -47,6 +48,20 @@ struct json_node {
 };
 
 //return type int is for notification of operation success or fail(error).
+
+//minor functions
+//check validity of json file.
+int cjson_invalid(char *json, int size);
+struct json_obj_head* __parse(char *json, int size);
+//parsing functions
+void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int size);
+void cjson_make_json_node(char *json, struct json_obj_head *cjson, int *index);
+void cjson_check_val_type(char *json, int *index, char *type);
+void cjson_make_numval(char *json, struct json_node *key, int *index);
+void cjson_make_strval(char *json, struct json_node *key, int *index);
+void cjson_make_nulval(char *json, struct json_node *key, int *index);
+void cjson_make_arrval(char *json, struct json_node *key, int *index);
+void cjson_make_boolval(char *json, struct json_node *key, int *index);
 
 //get value of json by passing key.
 void* cjson_get(struct json_obj_head *json, char *key);
