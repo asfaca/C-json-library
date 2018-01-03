@@ -92,7 +92,8 @@ void cjson_check_val_type(char *json, int *index, unsigned char *type) {
 }
 
 void cjson_make_numval(char *json, struct json_node *key, int *index) {
-
+    int start, end;
+    
 }
 
 void cjson_make_strval(char *json, struct json_node *key, int *index) {
