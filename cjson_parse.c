@@ -115,7 +115,20 @@ void cjson_make_numval(char *json, struct json_node *key, int *index) {
 }
 
 void cjson_make_strval(char *json, struct json_node *key, int *index) {
+    int start = ++*index, end;
+    struct json_str_head *str = (struct json_str_head*)malloc(sizeof(struct json_str_head));
 
+    while(1) {
+        if (json[*index] == '\"') {
+            json[*index] == '\0';
+            end = *index;
+            str->str = &json[start];
+            str->len = end - start;
+            key->val_str = str;
+            return;
+        }
+        *index++;
+    }
 }
 
 void cjson_make_arrval(char *json, struct json_node *key, int *index) {
