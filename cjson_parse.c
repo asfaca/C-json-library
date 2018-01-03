@@ -92,12 +92,43 @@ void cjson_check_val_type(char *json, int *index, unsigned char *type) {
 }
 
 void cjson_make_numval(char *json, struct json_node *key, int *index) {
-    int start, end;
-    
+    int start = *index, end;
+    char *temp = NULL;
+
+    while(1) {
+        if (json[*index] >== 48 && json[*index] <== 57)
+            *index++;
+        else {
+            end = *index;
+            *index--;
+            break;
+        }
+    }
+    temp = (char*)malloc(sizeof(end - start + 1));
+    memcpy(temp, json[start], end - start);
+    temp[end-start] = '\0';
+
+    if (strchr(temp, '.'))
+        key->val_num_double = atof(temp);
+    else 
+        key->val_num_int = atoi(temp);
 }
 
 void cjson_make_strval(char *json, struct json_node *key, int *index) {
+    int start = ++*index, end;
+    struct json_str_head *str = (struct json_str_head*)malloc(sizeof(struct json_str_head));
 
+    while(1) {
+        if (json[*index] == '\"') {
+            json[*index] == '\0';
+            end = *index;
+            str->str = &json[start];
+            str->len = end - start;
+            key->val_str = str;
+            return;
+        }
+        *index++;
+    }
 }
 
 void cjson_make_arrval(char *json, struct json_node *key, int *index) {

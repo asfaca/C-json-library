@@ -36,9 +36,8 @@ struct json_str_head {
 struct json_node {
     char                    *key;
     unsigned char           val_type;       //srting, number, object, boolean, null
-    int                     *val_num_int;
-    float                   *val_num_float;
-    double                  *val_num_double;
+    int                     val_num_int;
+    double                  val_num_double;
     unsigned char           val_bool;
     unsigned char           val_null;
     struct json_str_head    *val_str;
