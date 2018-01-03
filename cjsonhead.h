@@ -39,7 +39,6 @@ struct json_node {
     int                     val_num_int;
     double                  val_num_double;
     unsigned char           val_bool;
-    unsigned char           val_null;
     struct json_str_head    *val_str;
     struct json_obj_head    *val_obj;
     struct json_arr_head    *val_arr;

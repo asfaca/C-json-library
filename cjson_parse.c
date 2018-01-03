@@ -94,6 +94,7 @@ void cjson_check_val_type(char *json, int *index, unsigned char *type) {
 void cjson_make_numval(char *json, struct json_node *key, int *index) {
     int start = *index, end;
     char *temp = NULL;
+    key->val_type = NUM;
 
     while(1) {
         if (json[*index] >== 48 && json[*index] <== 57)
@@ -125,6 +126,7 @@ void cjson_make_strval(char *json, struct json_node *key, int *index) {
             str->str = &json[start];
             str->len = end - start;
             key->val_str = str;
+            key->val_type = STR;
             return;
         }
         *index++;
@@ -136,11 +138,21 @@ void cjson_make_arrval(char *json, struct json_node *key, int *index) {
 }
 
 void cjson_make_nulval(char *json, struct json_node *key, int *index) {
-
+    key->val_type = NUL;
 }
 
 void cjson_make_boolval(char *json, struct json_node *key, int *index) {
-
+    key->val_type = BOOL;
+    if (json[*index] == 't') {
+        key->val_bool = 0x01;
+        *index += 3;
+        return;
+    }
+    else {
+        key->val_bool = 0x00;
+        *index += 4;
+        return;
+    }
 }
 
 /* call chain - object maker */
