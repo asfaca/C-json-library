@@ -1,10 +1,10 @@
 //value type
-#define NUM     0x01
-#define STR     0x02
-#define ARR     0x03
-#define OBJ     0x04
-#define NUL     0x05
-#define BOOL    0x06
+#define NUM     (unsigned char)0x01
+#define STR     (unsigned char)0x02
+#define ARR     (unsigned char)0x03
+#define OBJ     (unsigned char)0x04
+#define NUL     (unsigned char)0x05
+#define BOOL    (unsigned char)0x06
 
 //error type
 #define ERRKEY  1
