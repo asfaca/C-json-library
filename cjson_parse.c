@@ -26,8 +26,7 @@ int cjson_invalid(char *json, int size) {
 }
 
 void cjson_make_json_node(char *json, struct json_obj_head *cjson, int *index) {
-    int k_start = ++*index, k_end;
-    char *keyname = NULL;
+    int k_start = ++*index;
     struct json_node *keynode = NULL;
 
     //mem allocate for json_node.
@@ -40,22 +39,18 @@ void cjson_make_json_node(char *json, struct json_obj_head *cjson, int *index) {
     
     //set key fields
     while(1) {
-        if (*index == '\"') {
-            k_end = *index;
+        if (json[*index] == '\"') {
+            json[*index] = '\0';
             break;
         }
         *index++;
     }
-    keyname = (char*)malloc(sizeof(k_end - k_start + 1));
-    memcpy((char*)keyname, (char*)&json[k_start], k_end - k_start);
-    keyname[k_end - k_start] = '\0';
-    keynode->key = keyname;
+    keynode->key = &json[k_start];
 
     //set link between obj head and node. 
     if (cjson->head == NULL) {
         cjson->head = keynode;
         cjson->tail = keynode;
-        cjson->len++;
     }
     else {
         cjson->tail->next = keynode;
