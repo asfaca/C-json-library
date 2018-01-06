@@ -130,11 +130,42 @@ void cjson_make_strval(char *json, struct json_node *key, int *index) {
             return;
         }
         *index++;
+
     }
 }
 
 void cjson_make_arrval(char *json, struct json_node *key, int *index) {
+    unsigned char type;
+    struct json_arr_head arr_head = (struct json_arr_head)malloc(sizeof(struct json_arr_head));
+    memset(arr_head, 0, sizeof(struct json_arr_head));
 
+    *index++;
+    while(1) {
+        if (json[*index] == ']') {
+            *index++;
+            return;
+        }
+        cjson_check_val_type(json, index, &type);
+
+        if (type == NUM) {
+            
+        }
+        else if (type == STR) {
+            
+        }
+        else if (type == OBJ) {
+            
+        }
+        else if (type == ARR) {
+            
+        }
+        else if (type == NUL) {
+            
+        }
+        else if (type == BOOL) {
+            
+        }
+    }
 }
 
 void cjson_make_nulval(char *json, struct json_node *key, int *index) {
