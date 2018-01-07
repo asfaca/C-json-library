@@ -9,7 +9,7 @@
 #include <string.h>
 
 int main(void) {
-    struct json_obj_head *json = cjson_parse("sample.json");
+    struct json_head *json = cjson_parse("sample.json");
 
     return 0;
 }
@@ -25,7 +25,7 @@ int cjson_invalid(char *json, int size) {
     return 0;
 }
 
-void cjson_make_json_node(char *json, struct json_obj_head *cjson, int *index) {
+void cjson_make_json_node(char *json, struct json_head *cjson, int *index) {
     int k_start = ++*index;
     struct json_node *keynode = NULL;
 
@@ -187,14 +187,14 @@ void cjson_make_boolval(char *json, struct json_node *key, int *index) {
 }
 
 /* call chain - object maker */
-void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int size) {
+void cjson_make_obj(char *json, struct json_head *cjson, int *index, int size) {
     unsigned char type;
-    cjson = (struct json_obj_head*)malloc(sizeof(struct json_obj_head));
+    cjson = (struct json_head*)malloc(sizeof(struct json_head));
     if (cjson == NULL) {
-        printf("ERR : json_obj_head malloc error\n");
+        printf("ERR : json_head malloc error\n");
         return;
     }
-    /* init json_obj_head */
+    /* init json_head */
     cjson->len = 0;
     cjson->head = NULL;
     cjson->tail = NULL;
@@ -246,16 +246,16 @@ void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int siz
     ex) whenever encountering brace {, call function which makes obj struct
         whenever encountering double quotation ", call function which makes key node struct...
 */
-struct json_obj_head* __parse(char *json, int size) {
+struct json_head* __parse(char *json, int size) {
 
     int i = 1;
-    struct json_obj_head *cjson = NULL;
+    struct json_head *cjson = NULL;
     cjson_make_obj(json, cjson ,&i, size);
     return cjson;
 }
 
 //open json file, parse and convert json to C data structure.
-struct json_obj_head* cjson_parse(char *path) {
+struct json_head* cjson_parse(char *path) {
     /*  
         open json file
         and check error
