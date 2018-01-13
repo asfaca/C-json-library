@@ -14,7 +14,7 @@ void debug_print(struct json_head *json) {
 
 
 int main(void) {
-    struct json_head *json = cjson_parse("sample2.json");
+    struct json_head *json = cjson_parse("sample.json");
     
     printf("%s\n", json->head->key);
     
@@ -33,7 +33,6 @@ int cjson_invalid(char *json, int size) {
 }
 
 void cjson_check_val_type(char *json, int *index, unsigned char *type) {
-    (*index)++;
     while(1) {
         if (json[*index] == '\"') {
             *type = STR;
@@ -137,6 +136,7 @@ void cjson_make_boolval(char *json, struct json_node *key, int *index) {
 
 
 //Must be debugged...
+//head->next 연결이 안되는 문제가 생김...
 void cjson_make_json_node(char *json, struct json_head *cjson, int *index, int node_type) {
     int k_start;
     struct json_node *keynode = NULL;
@@ -181,6 +181,7 @@ void cjson_make_arrval(char *json, struct json_node *key, int *index) {
     arr_head->head = NULL;
     arr_head->tail = NULL;
     key->val_arr = arr_head;
+    key->val_type = ARR;
 
     (*index)++;
     while(1) {
@@ -206,6 +207,7 @@ void cjson_make_arrval(char *json, struct json_node *key, int *index) {
             else if (type == OBJ) {
                 //how to increase INDEX of ARR?
                 arr_head->tail->val_obj = (struct json_head*)malloc(sizeof(struct json_head));
+                arr_head->tail->val_type = OBJ;
                 cjson_make_obj(json, arr_head->tail->val_obj, index);
                 arr_head->tail->index = arr_head->len++;
             }
@@ -252,6 +254,7 @@ void cjson_make_obj(char *json, struct json_head *cjson, int *index) {
             }
             else if (type == OBJ) {
                 cjson->tail->val_obj = (struct json_head*)malloc(sizeof(struct json_head));
+                cjson->tail->val_type = OBJ;
                 cjson_make_obj(json, cjson->tail->val_obj, index);
             }
             else if (type == ARR) {
@@ -263,10 +266,6 @@ void cjson_make_obj(char *json, struct json_head *cjson, int *index) {
             else if (type == BOOL) {
                 cjson_make_common_val(json, cjson, index, OBJNODE, cjson_make_boolval);
             }
-        }
-        else if (json[*index] == ',') {
-            (*index)++;
-            continue;
         }
         else if (json[*index] == '}') {
             return;
