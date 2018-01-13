@@ -28,9 +28,9 @@ struct json_node {
 //minor functions
 //check validity of json file.
 int cjson_invalid(char *json, int size);
-struct json_head* __parse(char *json, int size);
+struct json_head* __parse(char *json);
 //parsing functions
-void cjson_make_obj(char *json, struct json_head *cjson, int *index, int size);
+void cjson_make_obj(char *json, struct json_head *cjson, int *index);
 void cjson_make_json_node(char *json, struct json_head *cjson, int *index, int node_type);
 void cjson_check_val_type(char *json, int *index, unsigned char *type);
 void cjson_make_common_val(char *json, struct json_head *cjson, int *index, int node_type,
@@ -38,7 +38,7 @@ void cjson_make_common_val(char *json, struct json_head *cjson, int *index, int 
 void cjson_make_numval(char *json, struct json_node *key, int *index);
 void cjson_make_strval(char *json, struct json_node *key, int *index);
 void cjson_make_nulval(char *json, struct json_node *key, int *index);
-void cjson_make_arrval(char *json, struct json_node *key, int *index, int size);
+void cjson_make_arrval(char *json, struct json_node *key, int *index);
 void cjson_make_boolval(char *json, struct json_node *key, int *index);
 
 //get value of json by passing key.
