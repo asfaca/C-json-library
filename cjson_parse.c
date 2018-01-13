@@ -80,6 +80,9 @@ void cjson_make_numval(char *json, struct json_node *key, int *index) {
         if (json[*index] >= 48 && json[*index] <= 57) {
             (*index)++;
         }
+        else if (json[*index] == '.') {
+            (*index)++;
+        }
         else {
             end = *index;
             (*index)--;
