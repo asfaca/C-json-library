@@ -9,6 +9,6 @@ clean:
 	rm -f *.o $(TARGET)
 
 $(TARGET): $(OBJS)
-	$(CC) -o $@ $(OBJS)
+	$(CC) -g -o $@ $(OBJS)
 
 cjson_parse.o: cjsonhead.h cjsontype.h cjson_parse.c
