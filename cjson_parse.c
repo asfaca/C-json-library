@@ -9,7 +9,7 @@
 #include <string.h>
 
 int main(void) {
-    struct json_obj_head *json = cjson_parse("sample.json");
+    struct json_head *json = cjson_parse("sample.json");
 
     return 0;
 }
@@ -25,8 +25,9 @@ int cjson_invalid(char *json, int size) {
     return 0;
 }
 
-void cjson_make_json_node(char *json, struct json_obj_head *cjson, int *index) {
-    int k_start = ++*index;
+//Must be debugged...
+void cjson_make_json_node(char *json, struct json_head *cjson, int *index, int node_type) {
+    int k_start;
     struct json_node *keynode = NULL;
 
     //mem allocate for json_node.
@@ -37,15 +38,18 @@ void cjson_make_json_node(char *json, struct json_obj_head *cjson, int *index) {
     }
     memset(keynode, 0, sizeof(struct json_node));
     
-    //set key fields
-    while(1) {
-        if (json[*index] == '\"') {
-            json[*index] = '\0';
-            break;
+    //set key fields (for object node)
+    if (node_type == OBJNODE) {
+        k_start = ++*index;
+        while(1) {
+            if (json[*index] == '\"') {
+                json[*index] = '\0';
+                break;
+            }
+            *index++;
         }
-        *index++;
+        keynode->key = &json[k_start];
     }
-    keynode->key = &json[k_start];
 
     //set link between obj head and node. 
     if (cjson->head == NULL) {
@@ -67,14 +71,14 @@ void cjson_check_val_type(char *json, int *index, unsigned char *type) {
             return;
         }
         else if (json[*index] == '{') {
-            *type = OBJ
+            *type = OBJ;
             return;
         }
         else if (json[*index] == '[') {
             *type = ARR;
             return;
         }
-        else if (json[*index] >== 48 && json[*index] <== 57) {
+        else if (json[*index] >= 48 && json[*index] <= 57) {
             *type = NUM;
             return;
         }
@@ -91,13 +95,21 @@ void cjson_check_val_type(char *json, int *index, unsigned char *type) {
     }
 }
 
+void cjson_make_common_val(char *json, struct json_head *cjson, int *index, int node_type,
+                       void *func(char *, struct json_node *, int *)) {
+    func(json, cjson->tail, index);
+    if (node_type == ARRNODE) {
+        cjson->tail->index = cjson->len++;
+    }
+}
+
 void cjson_make_numval(char *json, struct json_node *key, int *index) {
     int start = *index, end;
     char *temp = NULL;
     key->val_type = NUM;
 
     while(1) {
-        if (json[*index] >== 48 && json[*index] <== 57)
+        if (json[*index] >= 48 && json[*index] <= 57)
             *index++;
         else {
             end = *index;
@@ -115,6 +127,7 @@ void cjson_make_numval(char *json, struct json_node *key, int *index) {
         key->val_num_int = atoi(temp);
 }
 
+
 void cjson_make_strval(char *json, struct json_node *key, int *index) {
     int start = ++*index, end;
     struct json_str_head *str = (struct json_str_head*)malloc(sizeof(struct json_str_head));
@@ -130,11 +143,8 @@ void cjson_make_strval(char *json, struct json_node *key, int *index) {
             return;
         }
         *index++;
+
     }
-}
-
-void cjson_make_arrval(char *json, struct json_node *key, int *index) {
-
 }
 
 void cjson_make_nulval(char *json, struct json_node *key, int *index) {
@@ -155,44 +165,102 @@ void cjson_make_boolval(char *json, struct json_node *key, int *index) {
     }
 }
 
-/* call chain - object maker */
-void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int size) {
+void cjson_make_arrval(char *json, struct json_node *key, int *index, int size) {
     unsigned char type;
-    cjson = (struct json_obj_head*)malloc(sizeof(struct json_obj_head));
+    struct json_head *arr_head = (struct json_head *)malloc(sizeof(struct json_head));
+    memset(arr_head, 0, sizeof(struct json_head));
+    key->val_arr = arr_head;
+
+    *index++;
+    while(1) {
+        if (json[*index] == ']') {
+            return;
+        }
+        else if (json[*index] == ' ' || json[*index] == ',') {
+            *index++;
+            continue;
+        }
+        else {
+            cjson_make_json_node(json, arr_head, index, ARRNODE);
+            cjson_check_val_type(json, index, &type);
+
+            if (type == NUM) {
+                //cjson_make_numval(json, arr_head, index, ARRNODE);
+                cjson_make_common_val(json, arr_head, index, ARRNODE, cjson_make_numval);
+            }
+            else if (type == STR) {
+                //cjson_make_strval(json, arr_head, index);
+                cjson_make_common_val(json, arr_head, index, ARRNODE, cjson_make_strval);
+            }
+            else if (type == OBJ) {
+                //how to increase INDEX of ARR?
+                cjson_make_obj(json, arr_head->tail->val_obj, index, size);
+                arr_head->tail->index = arr_head->len++;
+            }
+            else if (type == ARR) {
+                //how to increase INDEX of ARR?
+                cjson_make_arrval(json, arr_head->tail, index, size);
+                arr_head->tail->index = arr_head->len++;
+            }
+            else if (type == NUL) {
+                //cjson_make_nulval(json, arr_head, index);
+                cjson_make_common_val(json, arr_head, index, ARRNODE, cjson_make_nulval);
+            }
+            else if (type == BOOL) {
+                //cjson_make_boolval(json, arr_head, index);
+                cjson_make_common_val(json, arr_head, index, ARRNODE, cjson_make_boolval);
+            }
+        }
+        *index++;
+    }
+}
+
+/* call chain - object maker */
+void cjson_make_obj(char *json, struct json_head *cjson, int *index, int size) {
+    unsigned char type;
+    cjson = (struct json_head*)malloc(sizeof(struct json_head));
     if (cjson == NULL) {
-        printf("ERR : json_obj_head malloc error\n");
+        printf("ERR : json_head malloc error\n");
         return;
     }
-    /* init json_obj_head */
+    /* init json_head */
     cjson->len = 0;
     cjson->head = NULL;
     cjson->tail = NULL;
 
     while (*index < size) {    
         //make key node.
-        if (json[*index] == '\"')
-            cjson_make_json_node(json, cjson, index);
+        if (json[*index] == '\"') {
+            cjson_make_json_node(json, cjson, index, OBJNODE);
+        }
         //check : token. if token is :, decide which type of value.
         else if (json[*index] == ':') {
             cjson_check_val_type(json, index, &type);
             //make value node for valid type.
             if (type == NUM) {
-                cjson_make_numval(json, cjson->tail, index);
+                //cjson_make_numval(json, cjson->tail, index);
+                cjson_make_common_val(json, cjson, index, OBJNODE, cjson_make_numval);
             }
             else if (type == STR) {
-                cjson_make_strval(json, cjson->tail, index);
+                //cjson_make_strval(json, cjson->tail, index);
+                //cjson_make_strval(json, cjson, index);
+                cjson_make_common_val(json, cjson, index, OBJNODE, cjson_make_strval);
             }
             else if (type == OBJ) {
                 cjson_make_obj(json, cjson->tail->val_obj, index, size);
             }
             else if (type == ARR) {
-                cjson_make_arrval(json, cjson->tail, index);
+                cjson_make_arrval(json, cjson->tail, index, size);
             }
             else if (type == NUL) {
-                cjson_make_nulval(json, cjson->tail, index);
+                //cjson_make_nulval(json, cjson->tail, index);
+                //cjson_make_nulval(json, cjson, index);
+                cjson_make_common_val(json, cjson, index, OBJNODE, cjson_make_nulval);
             }
             else if (type == BOOL) {
-                cjson_make_boolval(json, cjson->tail, index);
+                //cjson_make_boolval(json, cjson->tail, index);
+                //cjson_make_boolval(json, cjson, index);
+                cjson_make_common_val(json, cjson, index, OBJNODE, cjson_make_boolval);
             }
         }
         //check , for continue
@@ -202,7 +270,6 @@ void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int siz
         }
         //check end brace for exit while loop.
         else if (json[*index] == '}') {
-            *index++;
             return;
         }
         //increase i
@@ -215,16 +282,16 @@ void cjson_make_obj(char *json, struct json_obj_head *cjson, int *index, int siz
     ex) whenever encountering brace {, call function which makes obj struct
         whenever encountering double quotation ", call function which makes key node struct...
 */
-struct json_obj_head* __parse(char *json, int size) {
+struct json_head* __parse(char *json, int size) {
 
     int i = 1;
-    struct json_obj_head *cjson = NULL;
+    struct json_head *cjson = NULL;
     cjson_make_obj(json, cjson ,&i, size);
     return cjson;
 }
 
 //open json file, parse and convert json to C data structure.
-struct json_obj_head* cjson_parse(char *path) {
+struct json_head* cjson_parse(char *path) {
     /*  
         open json file
         and check error

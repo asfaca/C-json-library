@@ -10,3 +10,7 @@
 #define ERRKEY  1
 #define ERRVAL  2
 #define ERRJSN  3
+
+//Use when distinguishing if it is arr node or obj node (it = struct json_node)
+#define ARRNODE 1
+#define OBJNODE 2
