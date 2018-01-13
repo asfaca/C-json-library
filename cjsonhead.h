@@ -33,6 +33,8 @@ struct json_head* __parse(char *json, int size);
 void cjson_make_obj(char *json, struct json_head *cjson, int *index, int size);
 void cjson_make_json_node(char *json, struct json_head *cjson, int *index, int node_type);
 void cjson_check_val_type(char *json, int *index, unsigned char *type);
+void cjson_make_common_val(char *json, struct json_head *cjson, int *index, int node_type,
+                       void *func(char *, struct json_node *, int *));
 void cjson_make_numval(char *json, struct json_node *key, int *index);
 void cjson_make_strval(char *json, struct json_node *key, int *index);
 void cjson_make_nulval(char *json, struct json_node *key, int *index);

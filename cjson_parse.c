@@ -25,15 +25,10 @@ int cjson_invalid(char *json, int size) {
     return 0;
 }
 
-//need to rewrite... include argu node_type...
+//Must be debugged...
 void cjson_make_json_node(char *json, struct json_head *cjson, int *index, int node_type) {
     int k_start;
     struct json_node *keynode = NULL;
-
-    //this is for object node.
-    if (node_type == OBJNODE) {
-        k_start = ++*index;
-    }
 
     //mem allocate for json_node.
     keynode = (struct json_node *)malloc(sizeof(struct json_node));
@@ -45,6 +40,7 @@ void cjson_make_json_node(char *json, struct json_head *cjson, int *index, int n
     
     //set key fields (for object node)
     if (node_type == OBJNODE) {
+        k_start = ++*index;
         while(1) {
             if (json[*index] == '\"') {
                 json[*index] = '\0';
@@ -99,6 +95,14 @@ void cjson_check_val_type(char *json, int *index, unsigned char *type) {
     }
 }
 
+void cjson_make_common_val(char *json, struct json_head *cjson, int *index, int node_type,
+                       void *func(char *, struct json_node *, int *)) {
+    func(json, cjson->tail, index);
+    if (node_type == ARRNODE) {
+        cjson->tail->index = cjson->len++;
+    }
+}
+
 void cjson_make_numval(char *json, struct json_node *key, int *index) {
     int start = *index, end;
     char *temp = NULL;
@@ -122,6 +126,7 @@ void cjson_make_numval(char *json, struct json_node *key, int *index) {
     else 
         key->val_num_int = atoi(temp);
 }
+
 
 void cjson_make_strval(char *json, struct json_node *key, int *index) {
     int start = ++*index, end;
@@ -180,22 +185,30 @@ void cjson_make_arrval(char *json, struct json_node *key, int *index, int size) 
             cjson_check_val_type(json, index, &type);
 
             if (type == NUM) {
-                cjson_make_numval(json, arr_head, index);
+                //cjson_make_numval(json, arr_head, index, ARRNODE);
+                cjson_make_common_val(json, arr_head, index, ARRNODE, cjson_make_numval);
             }
             else if (type == STR) {
-                cjson_make_strval(json, arr_head, index);
+                //cjson_make_strval(json, arr_head, index);
+                cjson_make_common_val(json, arr_head, index, ARRNODE, cjson_make_strval);
             }
             else if (type == OBJ) {
+                //how to increase INDEX of ARR?
                 cjson_make_obj(json, arr_head->tail->val_obj, index, size);
+                arr_head->tail->index = arr_head->len++;
             }
             else if (type == ARR) {
+                //how to increase INDEX of ARR?
                 cjson_make_arrval(json, arr_head->tail, index, size);
+                arr_head->tail->index = arr_head->len++;
             }
             else if (type == NUL) {
-                cjson_make_nulval(json, arr_head, index);
+                //cjson_make_nulval(json, arr_head, index);
+                cjson_make_common_val(json, arr_head, index, ARRNODE, cjson_make_nulval);
             }
             else if (type == BOOL) {
-                cjson_make_boolval(json, arr_head, index);
+                //cjson_make_boolval(json, arr_head, index);
+                cjson_make_common_val(json, arr_head, index, ARRNODE, cjson_make_boolval);
             }
         }
         *index++;
@@ -226,11 +239,12 @@ void cjson_make_obj(char *json, struct json_head *cjson, int *index, int size) {
             //make value node for valid type.
             if (type == NUM) {
                 //cjson_make_numval(json, cjson->tail, index);
-                cjson_make_numval(json, cjson, *index);
+                cjson_make_common_val(json, cjson, index, OBJNODE, cjson_make_numval);
             }
             else if (type == STR) {
                 //cjson_make_strval(json, cjson->tail, index);
-                cjson_make_strval(json, cjson, index);
+                //cjson_make_strval(json, cjson, index);
+                cjson_make_common_val(json, cjson, index, OBJNODE, cjson_make_strval);
             }
             else if (type == OBJ) {
                 cjson_make_obj(json, cjson->tail->val_obj, index, size);
@@ -240,11 +254,13 @@ void cjson_make_obj(char *json, struct json_head *cjson, int *index, int size) {
             }
             else if (type == NUL) {
                 //cjson_make_nulval(json, cjson->tail, index);
-                cjson_make_nulval(json, cjson, index);
+                //cjson_make_nulval(json, cjson, index);
+                cjson_make_common_val(json, cjson, index, OBJNODE, cjson_make_nulval);
             }
             else if (type == BOOL) {
                 //cjson_make_boolval(json, cjson->tail, index);
-                cjson_make_boolval(json, cjson, index);
+                //cjson_make_boolval(json, cjson, index);
+                cjson_make_common_val(json, cjson, index, OBJNODE, cjson_make_boolval);
             }
         }
         //check , for continue
