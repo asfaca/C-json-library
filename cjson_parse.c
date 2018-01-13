@@ -27,8 +27,13 @@ int cjson_invalid(char *json, int size) {
 
 //need to rewrite... include argu node_type...
 void cjson_make_json_node(char *json, struct json_head *cjson, int *index, int node_type) {
-    int k_start = ++*index;
+    int k_start;
     struct json_node *keynode = NULL;
+
+    //this is for object node.
+    if (node_type == OBJNODE) {
+        k_start = ++*index;
+    }
 
     //mem allocate for json_node.
     keynode = (struct json_node *)malloc(sizeof(struct json_node));
@@ -38,15 +43,17 @@ void cjson_make_json_node(char *json, struct json_head *cjson, int *index, int n
     }
     memset(keynode, 0, sizeof(struct json_node));
     
-    //set key fields
-    while(1) {
-        if (json[*index] == '\"') {
-            json[*index] = '\0';
-            break;
+    //set key fields (for object node)
+    if (node_type == OBJNODE) {
+        while(1) {
+            if (json[*index] == '\"') {
+                json[*index] = '\0';
+                break;
+            }
+            *index++;
         }
-        *index++;
+        keynode->key = &json[k_start];
     }
-    keynode->key = &json[k_start];
 
     //set link between obj head and node. 
     if (cjson->head == NULL) {
