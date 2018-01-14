@@ -1,8 +1,16 @@
+struct json_depth_list {
+    int depth;
+    struct json_head *head, *tail;
+    struct json_depth_list *next_depth;
+}
+
 struct json_head {
-    //linked list of json_node structure
-    int len;
+    int len;    //This field is for array value.
     struct json_node *head;
     struct json_node *tail;
+    //This is for depth list structure
+    struct json_head *next, *prev;
+    struct json_depth_list *
 };
 
 struct json_str_head {

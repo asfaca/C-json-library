@@ -8,10 +8,6 @@
 #include <unistd.h>
 #include <string.h>
 
-void debug_print(struct json_head *json) {
-
-}
-
 
 int main(void) {
     struct json_head *json = cjson_parse("sample.json");
@@ -247,6 +243,7 @@ void cjson_make_obj(char *json, struct json_head *cjson, int *index) {
             cjson_make_json_node(json, cjson, index, OBJNODE);
         }
         else if (json[*index] == ':') {
+            (*index)++;  //Must be removed first if there is Sengmentail fault!
             cjson_check_val_type(json, index, &type);
             //make value node for valid type.
             if (type == NUM) {
