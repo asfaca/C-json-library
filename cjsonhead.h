@@ -2,15 +2,15 @@ struct json_depth_list {
     int depth;
     struct json_head *head, *tail;
     struct json_depth_list *next_depth;
-}
+};
 
 struct json_head {
     int len;    //This field is for array value.
     struct json_node *head;
     struct json_node *tail;
     //This is for depth list structure
-    struct json_head *next, *prev;
-    struct json_depth_list *
+    struct json_head *next, *prev;  //NOT FOR ARRAY HEAD!
+    struct json_depth_list *depth;
 };
 
 struct json_str_head {
@@ -38,7 +38,7 @@ struct json_node {
 int cjson_invalid(char *json, int size);
 struct json_head* __parse(char *json);
 //parsing functions
-void cjson_make_obj(char *json, struct json_head *cjson, int *index);
+void cjson_make_obj(char *json, struct json_head *cjson, int *index, int depth);
 void cjson_make_json_node(char *json, struct json_head *cjson, int *index, int node_type);
 void cjson_check_val_type(char *json, int *index, unsigned char *type);
 void cjson_make_common_val(char *json, struct json_head *cjson, int *index, int node_type,
@@ -46,7 +46,7 @@ void cjson_make_common_val(char *json, struct json_head *cjson, int *index, int 
 void cjson_make_numval(char *json, struct json_node *key, int *index);
 void cjson_make_strval(char *json, struct json_node *key, int *index);
 void cjson_make_nulval(char *json, struct json_node *key, int *index);
-void cjson_make_arrval(char *json, struct json_node *key, int *index);
+void cjson_make_arrval(char *json, struct json_node *key, int *index, int depth);
 void cjson_make_boolval(char *json, struct json_node *key, int *index);
 
 //get value of json by passing key.
@@ -61,3 +61,12 @@ int cjson_stringfy(struct json_head *json, char *filename);
 int cjson_push(struct json_head *json, void *value);
 //pop operation. this operation just remove value. it does not return value.
 int cjson_rm(struct json_head *json, char *key);
+
+
+//macro funcrions
+#define init_json_head(json)    json->len = 0;\
+                                json->head = NULL;\
+                                json->tail = NULL;\
+                                json->next = NULL;\
+                                json->prev = NULL;\
+                                json->depth = NULL;

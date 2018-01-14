@@ -10,7 +10,7 @@
 
 
 int main(void) {
-    struct json_head *json = cjson_parse("sample.json");
+    struct json_head *json = cjson_parse("sample2.json");
     
     printf("%s\n", json->head->key);
     
@@ -70,7 +70,6 @@ void cjson_make_common_val(char *json, struct json_head *cjson, int *index, int 
 void cjson_make_numval(char *json, struct json_node *key, int *index) {
     int start = *index, end;
     char *temp = NULL;
-    key->val_type = NUM;
 
     while(1) {
         if (json[*index] >= 48 && json[*index] <= 57) {
@@ -89,10 +88,14 @@ void cjson_make_numval(char *json, struct json_node *key, int *index) {
     memcpy(temp, &json[start], end - start);
     temp[end-start] = '\0';
 
-    if (strchr(temp, '.'))
+    if (strchr(temp, '.')) {
         key->val_num_double = atof(temp);
-    else 
+        key->val_type = NUMFAT;
+    }
+    else {
         key->val_num_int = atoi(temp);
+        key->val_type = NUMINT;
+    }
 }
 
 
@@ -173,12 +176,10 @@ void cjson_make_json_node(char *json, struct json_head *cjson, int *index, int n
     }
 }
 
-void cjson_make_arrval(char *json, struct json_node *key, int *index) {
+void cjson_make_arrval(char *json, struct json_node *key, int *index, int depth) {
     unsigned char type;
     struct json_head *arr_head = (struct json_head *)malloc(sizeof(struct json_head));
-    arr_head->len = 0;
-    arr_head->head = NULL;
-    arr_head->tail = NULL;
+    init_json_head(arr_head);
     key->val_arr = arr_head;
     key->val_type = ARR;
 
@@ -187,7 +188,7 @@ void cjson_make_arrval(char *json, struct json_node *key, int *index) {
         if (json[*index] == ']') {
             return;
         }
-        else if (json[*index] == ' ' || json[*index] == ',') {
+        else if (json[*index] == ' ' || json[*index] == ',' || json[*index] == '\r' || json[*index] == '\n' || json[*index] == '\t') {
             (*index)++;
             continue;
         }
@@ -207,12 +208,12 @@ void cjson_make_arrval(char *json, struct json_node *key, int *index) {
                 //how to increase INDEX of ARR?
                 arr_head->tail->val_obj = (struct json_head*)malloc(sizeof(struct json_head));
                 arr_head->tail->val_type = OBJ;
-                cjson_make_obj(json, arr_head->tail->val_obj, index);
+                cjson_make_obj(json, arr_head->tail->val_obj, index, depth + 1);
                 arr_head->tail->index = arr_head->len++;
             }
             else if (type == ARR) {
                 //how to increase INDEX of ARR?
-                cjson_make_arrval(json, arr_head->tail, index);
+                cjson_make_arrval(json, arr_head->tail, index, depth);
                 arr_head->tail->index = arr_head->len++;
             }
             else if (type == NUL) {
@@ -229,13 +230,11 @@ void cjson_make_arrval(char *json, struct json_node *key, int *index) {
 }
 
 /* call chain - object maker */
-void cjson_make_obj(char *json, struct json_head *cjson, int *index) {
+void cjson_make_obj(char *json, struct json_head *cjson, int *index, int depth) {
     unsigned char type;
     
     /* init json_head */
-    cjson->len = 0;
-    cjson->head = NULL;
-    cjson->tail = NULL;
+    init_json_head(cjson);
     
     while (1) {    
         //make key node.
@@ -255,10 +254,10 @@ void cjson_make_obj(char *json, struct json_head *cjson, int *index) {
             else if (type == OBJ) {
                 cjson->tail->val_obj = (struct json_head*)malloc(sizeof(struct json_head));
                 cjson->tail->val_type = OBJ;
-                cjson_make_obj(json, cjson->tail->val_obj, index);
+                cjson_make_obj(json, cjson->tail->val_obj, index, depth + 1);
             }
             else if (type == ARR) {
-                cjson_make_arrval(json, cjson->tail, index);
+                cjson_make_arrval(json, cjson->tail, index, depth);
             }
             else if (type == NUL) {
                 cjson_make_common_val(json, cjson, index, OBJNODE, cjson_make_nulval);
@@ -282,7 +281,7 @@ void cjson_make_obj(char *json, struct json_head *cjson, int *index) {
 struct json_head* __parse(char *json) {
     int i = 1;
     struct json_head *cjson = (struct json_head*)malloc(sizeof(struct json_head));
-    cjson_make_obj(json, cjson , &i);
+    cjson_make_obj(json, cjson , &i, 0);
     return cjson;
 }
 
